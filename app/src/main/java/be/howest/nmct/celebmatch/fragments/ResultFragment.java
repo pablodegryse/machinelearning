@@ -5,22 +5,28 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import be.howest.nmct.celebmatch.R;
 
 public class ResultFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
+    private static final String PREDICTION_RESULT="predict_result";
+    private String mResultToShow;
+    private TextView txtViewResult;
 
     public ResultFragment() {
         // Required empty public constructor
     }
 
-    public static ResultFragment newInstance(String param1, String param2) {
+    public static ResultFragment newInstance(String prediction) {
         ResultFragment fragment = new ResultFragment();
         Bundle args = new Bundle();
+        args.putString(PREDICTION_RESULT,prediction);
         fragment.setArguments(args);
         return fragment;
     }
@@ -29,13 +35,17 @@ public class ResultFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
+            mResultToShow=getArguments().getString(PREDICTION_RESULT);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_result, container, false);
+        View myView= inflater.inflate(R.layout.fragment_result, container, false);
+        txtViewResult=(TextView) myView.findViewById(R.id.textViewResult);
+        txtViewResult.setText("You look most like: "+mResultToShow);
+        return myView;
     }
 
 

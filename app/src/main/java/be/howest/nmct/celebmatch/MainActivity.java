@@ -1,5 +1,6 @@
 package be.howest.nmct.celebmatch;
 
+import android.content.pm.PackageManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -21,10 +22,10 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.iHom
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         frameLayoutMain=(FrameLayout) findViewById(R.id.frameLayoutMain);
-        switchFragment(fragmentIds[0]);
+        switchFragment(fragmentIds[0],"");
     }
 
-    public void switchFragment(String fragmentId){
+    public void switchFragment(String fragmentId,String result){
         FragmentManager fragManager= getSupportFragmentManager();
         FragmentTransaction fragTransaction = fragManager.beginTransaction();
         switch(fragmentId){
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.iHom
                 fragTransaction.commit();
                 break;
             case "result":
-                ResultFragment resultFrag = new ResultFragment();
+                ResultFragment resultFrag = ResultFragment.newInstance(result);
                 fragTransaction.replace(R.id.frameLayoutMain,resultFrag);
                 fragTransaction.commit();
                 break;
@@ -48,6 +49,11 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.iHom
 
     @Override
     public void switchToPhotoFragment(String id) {
-        switchFragment(id);
+        switchFragment(id,"");
+    }
+
+    @Override
+    public void ShowResult(String result) {
+        switchFragment(fragmentIds[2],result);
     }
 }
