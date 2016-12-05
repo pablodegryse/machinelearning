@@ -27,6 +27,8 @@ import android.widget.ImageView;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -108,8 +110,12 @@ public class PhotoFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d("PREDICT","LETS GOOGOooGOOGOoOGOoGo");
-                if(mPhotoURI!=null){
-                    uploadImageToPredict();
+                if(mPhotoURI==null){
+                    try {
+                        uploadImageToPredict();
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                    }
                 }else {
                     Snackbar.make(mActivity.findViewById(R.id.frameLayoutMain), "Please retake the photo.", Snackbar.LENGTH_LONG).show();
                 }
@@ -187,8 +193,8 @@ public class PhotoFragment extends Fragment {
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                mPhotoURI = FileProvider.getUriForFile(mActivity,"be.howest.nmct.celebmatch",photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoURI);
+                //mPhotoURI=FileProvider.getUriForFile(getContext(),"be.howest.nmct.celebmatch",photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,photoFile.getAbsolutePath());
                 startActivityForResult(takePictureIntent,REQUEST_PHOTO);
                 Log.d("URI",mCurrentPhotoPath);
             }
@@ -201,7 +207,7 @@ public class PhotoFragment extends Fragment {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("ddMMyy_HHmmss").format(new Date());
         String imageFileName = timeStamp + "_CELEBMATCH";
-        File storageDir = mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File storageDir = mActivity.getFilesDir();
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -211,8 +217,10 @@ public class PhotoFragment extends Fragment {
         return image;
     }
 
-    private void uploadImageToPredict(){
-        File uploadFile = new File(mPhotoURI.getPath());
+    private void uploadImageToPredict() throws URISyntaxException {
+        //String path = mPhotoURI.getPath();
+        File uploadFile = new File(mCurrentPhotoPath);
+        String absPath=uploadFile.getAbsolutePath();
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"),uploadFile);
         MultipartBody.Part body = MultipartBody.Part.createFormData("picture", uploadFile.getName(), requestFile);
         Call<ResponseBody> uploadCall=mUploadService.uploadImageToPredict(body);
@@ -220,7 +228,7 @@ public class PhotoFragment extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d("success","YAAAAAAAY");
-                mListener.ShowResult(response.body().toString());
+                mListener.ShowResult(response.message());
             }
 
             @Override
@@ -232,7 +240,7 @@ public class PhotoFragment extends Fragment {
     }
 
     private void initRetrofit(){
-        mUploadHandler=new Retrofit.Builder().baseUrl("http://www.testserver.be/").build();
+        mUploadHandler=new Retrofit.Builder().baseUrl("http://178.119.51.123:8080").build();
         mUploadService=mUploadHandler.create(IUploadService.class);
     }
 

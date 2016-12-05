@@ -1,11 +1,9 @@
 package be.howest.nmct.celebmatch.fragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -14,7 +12,7 @@ import be.howest.nmct.celebmatch.R;
 
 public class ResultFragment extends Fragment {
 
-    private OnFragmentInteractionListener mListener;
+    private onResultFragmentListener mListener;
     private static final String PREDICTION_RESULT="predict_result";
     private String mResultToShow;
     private TextView txtViewResult;
@@ -52,8 +50,8 @@ public class ResultFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof onResultFragmentListener) {
+            mListener = (onResultFragmentListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement iPhotoFragmentListener");
@@ -66,7 +64,7 @@ public class ResultFragment extends Fragment {
         mListener = null;
     }
 
-    public interface OnFragmentInteractionListener {
+    public interface onResultFragmentListener {
 
     }
 }

@@ -13,7 +13,7 @@ import be.howest.nmct.celebmatch.fragments.ResultFragment;
 
 
 public class MainActivity extends AppCompatActivity implements HomeFragment.iHomeFragmentListener
-        ,PhotoFragment.iPhotoFragmentListener {
+        ,PhotoFragment.iPhotoFragmentListener,ResultFragment.onResultFragmentListener {
 
     private FrameLayout frameLayoutMain;
     public static final String[] fragmentIds={"home","photo","result"};
