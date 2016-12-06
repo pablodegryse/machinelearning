@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
@@ -24,13 +25,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ListView;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.FileNameMap;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import be.howest.nmct.celebmatch.MainActivity;
 import be.howest.nmct.celebmatch.R;
@@ -47,6 +52,8 @@ import retrofit2.Retrofit;
 import static android.app.Activity.RESULT_OK;
 
 public class PhotoFragment extends Fragment {
+    private File mPhotoFile;
+    private Bitmap mResultBitmap;
     private Retrofit mUploadHandler;
     private IUploadService mUploadService;
     private String mCurrentPhotoPath;
@@ -110,7 +117,7 @@ public class PhotoFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d("PREDICT","LETS GOOGOooGOOGOoOGOoGo");
-                if(mPhotoURI==null){
+                if(mPhotoURI!=null){
                     try {
                         uploadImageToPredict();
                     } catch (URISyntaxException e) {
@@ -185,18 +192,18 @@ public class PhotoFragment extends Fragment {
     private void openCamerWithIntent(){
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(mActivity.getPackageManager()) != null) {
-            File photoFile = null;
+            mPhotoFile = null;
             try {
-                photoFile = createImageFile();
+                mPhotoFile = createImageFile();
             } catch (IOException ex) {
                 // Error occurred while creating the File
             }
             // Continue only if the File was successfully created
-            if (photoFile != null) {
-                //mPhotoURI=FileProvider.getUriForFile(getContext(),"be.howest.nmct.celebmatch",photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,photoFile.getAbsolutePath());
+            if (mPhotoFile != null) {
+                mPhotoURI=FileProvider.getUriForFile(getContext(),"be.howest.nmct.celebmatch",mPhotoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,mPhotoURI);
                 startActivityForResult(takePictureIntent,REQUEST_PHOTO);
-                Log.d("URI",mCurrentPhotoPath);
+                Log.d("URI PATH==>",mPhotoURI.getPath());
             }
         }else {
             Snackbar.make(mActivity.findViewById(R.id.frameLayoutMain), "No camera app found :'(", Snackbar.LENGTH_SHORT).show();
@@ -207,7 +214,7 @@ public class PhotoFragment extends Fragment {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("ddMMyy_HHmmss").format(new Date());
         String imageFileName = timeStamp + "_CELEBMATCH";
-        File storageDir = mActivity.getFilesDir();
+        File storageDir = mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -217,12 +224,20 @@ public class PhotoFragment extends Fragment {
         return image;
     }
 
+    private Bitmap createBitmapFromPath(){
+        if(mPhotoFile.exists()){
+            mResultBitmap= BitmapFactory.decodeFile(mPhotoFile.getAbsolutePath());
+            mResultBitmap=Bitmap.createScaledBitmap(mResultBitmap,mResultBitmap.getWidth()/2,mResultBitmap.getHeight()/2,false);
+            mImageView.setImageBitmap(mResultBitmap);
+            return mResultBitmap;
+        }else {
+            return null;
+        }
+    }
+
     private void uploadImageToPredict() throws URISyntaxException {
-        //String path = mPhotoURI.getPath();
-        File uploadFile = new File(mCurrentPhotoPath);
-        String absPath=uploadFile.getAbsolutePath();
-        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"),uploadFile);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("picture", uploadFile.getName(), requestFile);
+        RequestBody requestFile = RequestBody.create(MediaType.parse("image/jpeg"),mPhotoFile);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("picture", mPhotoFile.getName(), requestFile);
         Call<ResponseBody> uploadCall=mUploadService.uploadImageToPredict(body);
         uploadCall.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -244,16 +259,11 @@ public class PhotoFragment extends Fragment {
         mUploadService=mUploadHandler.create(IUploadService.class);
     }
 
-    public String getPath(Uri uri) {
-        File myFile = new File(uri.getPath());
-        return myFile.getAbsolutePath();
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_PHOTO && resultCode == RESULT_OK) {
-            mImageView.setImageURI(mPhotoURI);
+            createBitmapFromPath();
         }
     }
 
