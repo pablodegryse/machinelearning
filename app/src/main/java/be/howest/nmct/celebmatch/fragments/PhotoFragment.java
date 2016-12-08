@@ -36,12 +36,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import be.howest.nmct.celebmatch.MainActivity;
 import be.howest.nmct.celebmatch.R;
 import be.howest.nmct.celebmatch.service.IUploadService;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -54,6 +56,7 @@ import static android.app.Activity.RESULT_OK;
 public class PhotoFragment extends Fragment {
     private File mPhotoFile;
     private Bitmap mResultBitmap;
+    private OkHttpClient mHttpClient;
     private Retrofit mUploadHandler;
     private IUploadService mUploadService;
     private String mCurrentPhotoPath;
@@ -243,7 +246,7 @@ public class PhotoFragment extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d("success","YAAAAAAAY");
-                mListener.ShowResult(response.message());
+                mListener.ShowResult(response.raw().toString());
             }
 
             @Override
@@ -255,7 +258,8 @@ public class PhotoFragment extends Fragment {
     }
 
     private void initRetrofit(){
-        mUploadHandler=new Retrofit.Builder().baseUrl("http://178.119.51.123:8080").build();
+        mHttpClient=new OkHttpClient().newBuilder().readTimeout(20, TimeUnit.SECONDS).build();
+        mUploadHandler=new Retrofit.Builder().baseUrl("http://192.168.1.100:8080").client(mHttpClient).build();
         mUploadService=mUploadHandler.create(IUploadService.class);
     }
 
