@@ -3,11 +3,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="be.howest.nmct.celebmatch.fragments.ResultFragment">
-
-    <TextView
-        android:id="@+id/textViewResult"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:orientation="vertical">
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:textSize="28sp"
+            android:text="You look most like :"
+            />
 
+        <ImageView
+            android:id="@+id/resultImage"
+            android:layout_width="match_parent"
+            android:layout_height="350dp"/>
+        <TextView
+            android:textSize="22sp"
+            android:layout_marginTop="10dp"
+            android:id="@+id/textViewResult"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:layout_height="30dp"
+            android:text="ededededed"/>
+        <TextView
+            android:layout_marginTop="10dp"
+            android:textSize="14sp"
+            android:id="@+id/textViewSecondaryResult"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:layout_height="30dp"
+            android:text="deeded"/>
+    </LinearLayout>
 </FrameLayout>

@@ -1,6 +1,7 @@
 package be.howest.nmct.celebmatch.fragments;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,6 +16,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -28,7 +30,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.FileNameMap;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -121,11 +126,7 @@ public class PhotoFragment extends Fragment {
             public void onClick(View v) {
                 Log.d("PREDICT","LETS GOOGOooGOOGOoOGOoGo");
                 if(mPhotoURI!=null){
-                    try {
-                        uploadImageToPredict();
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                    }
+                    verifyStoragePermissions(mActivity);
                 }else {
                     Snackbar.make(mActivity.findViewById(R.id.frameLayoutMain), "Please retake the photo.", Snackbar.LENGTH_LONG).show();
                 }
@@ -189,6 +190,15 @@ public class PhotoFragment extends Fragment {
                 }
                 return;
             }
+            case REQUEST_EXTERNAL_STORAGE:{
+                try {
+                    uploadImageToPredict();
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -230,7 +240,7 @@ public class PhotoFragment extends Fragment {
     private Bitmap createBitmapFromPath(){
         if(mPhotoFile.exists()){
             mResultBitmap= BitmapFactory.decodeFile(mPhotoFile.getAbsolutePath());
-            mResultBitmap=Bitmap.createScaledBitmap(mResultBitmap,mResultBitmap.getWidth()/2,mResultBitmap.getHeight()/2,false);
+            mResultBitmap=Bitmap.createScaledBitmap(mResultBitmap,mResultBitmap.getWidth()/4,mResultBitmap.getHeight()/4,false);
             mImageView.setImageBitmap(mResultBitmap);
             return mResultBitmap;
         }else {
@@ -238,15 +248,66 @@ public class PhotoFragment extends Fragment {
         }
     }
 
-    private void uploadImageToPredict() throws URISyntaxException {
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/jpeg"),mPhotoFile);
+
+    private File saveAndCompressBitmap() throws IOException {
+        if(mResultBitmap!=null){
+            String timeStamp = new SimpleDateFormat("ddMMyy_HHmmss").format(new Date());
+            String imageFileName = timeStamp + "_CELEBMATCH";
+            String path = Environment.getExternalStorageDirectory().toString();
+            OutputStream fOut = null;
+            Integer counter = 0;
+            File file = new File(path,imageFileName); // the File to save , append increasing numeric counter to prevent files from getting overwritten.
+            fOut = new FileOutputStream(file);
+            mResultBitmap.compress(Bitmap.CompressFormat.JPEG,90, fOut); // saving the Bitmap to a file compressed as a JPEG with 85% compression rate
+            fOut.close(); // do not forget to close the stream
+            Log.d("COMPRESS","COMPLETED");
+            return file;
+        }else{
+            return null;
+        }
+    }
+
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1234;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+    public void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }else{
+            try {
+                uploadImageToPredict();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void uploadImageToPredict() throws URISyntaxException, IOException {
+        RequestBody requestFile = RequestBody.create(MediaType.parse("image/jpeg"),saveAndCompressBitmap());
         MultipartBody.Part body = MultipartBody.Part.createFormData("picture", mPhotoFile.getName(), requestFile);
         Call<ResponseBody> uploadCall=mUploadService.uploadImageToPredict(body);
         uploadCall.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d("success","YAAAAAAAY");
-                mListener.ShowResult(response.raw().toString());
+                try {
+                    mListener.ShowResult(response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
