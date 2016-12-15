@@ -113,6 +113,30 @@ public class ResultFragment extends Fragment {
             case "robert de niro":
                 imgViewActor.setImageResource(R.drawable.robert_deniro);
                 break;
+            case "seth rogen":
+                imgViewActor.setImageResource(R.drawable.seth_rogen);
+                break;
+            case "paul walker":
+                imgViewActor.setImageResource(R.drawable.paul_walker);
+                break;
+            case "steve carell":
+                imgViewActor.setImageResource(R.drawable.steve_carell);
+                break;
+            case "jason statham":
+                imgViewActor.setImageResource(R.drawable.jason_statham);
+                break;
+            case "gabrial macht":
+                imgViewActor.setImageResource(R.drawable.gabriel_macht);
+                break;
+            case "bruce willis":
+                imgViewActor.setImageResource(R.drawable.bruce_willis);
+                break;
+            case "matthew mcconaughey":
+                imgViewActor.setImageResource(R.drawable.matthew_mcconaughey);
+                break;
+            case "christian bale":
+                imgViewActor.setImageResource(R.drawable.christian_bale);
+                break;
 
         }
     }
