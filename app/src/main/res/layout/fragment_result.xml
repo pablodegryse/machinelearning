@@ -20,7 +20,7 @@
             android:scaleType="centerInside"
             android:id="@+id/resultImage"
             android:layout_width="match_parent"
-            android:layout_height="350dp"/>
+            android:layout_height="315dp"/>
         <TextView
             android:textSize="22sp"
             android:layout_marginTop="10dp"
@@ -33,9 +33,9 @@
             android:layout_marginTop="10dp"
             android:textSize="12sp"
             android:id="@+id/textViewSecondaryResult"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_gravity="center"
-            android:layout_height="52dp"
+            android:layout_height="match_parent"
             android:text="deeded"/>
     </LinearLayout>
 </FrameLayout>

@@ -27,7 +27,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -77,6 +83,9 @@ public class PhotoFragment extends Fragment {
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 621;
     private static final int REQUEST_PHOTO=123;
 
+    private RelativeLayout layoutSpinner;
+    private LinearLayout layoutMain;
+
     public PhotoFragment() {
 
     }
@@ -99,9 +108,11 @@ public class PhotoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View myView=inflater.inflate(R.layout.fragment_photo, container, false);
+        layoutMain=(LinearLayout) myView.findViewById(R.id.layoutMain);
         mImageView=(ImageView) myView.findViewById(R.id.imagePhotoTaken);
         mBtnRetake=(Button) myView.findViewById(R.id.btnRetake);
         mBtnPredict=(Button) myView.findViewById(R.id.btnPredict);
+        layoutSpinner = (RelativeLayout) myView.findViewById(R.id.progressLayout);
         initRetrofit();
         setListeners();
         //camera shizzle initialiseren
@@ -125,6 +136,8 @@ public class PhotoFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d("PREDICT","LETS GOOGOooGOOGOoOGOoGo");
+                layoutMain.setVisibility(View.GONE);
+                layoutSpinner.setVisibility(View.VISIBLE);
                 if(mPhotoURI!=null){
                     verifyStoragePermissions(mActivity);
                 }else {
@@ -304,23 +317,26 @@ public class PhotoFragment extends Fragment {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d("success","YAAAAAAAY");
                 try {
+                    new JSONObject(response.body().string());
                     mListener.ShowResult(response.body().string());
                 } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (JSONException e) {
+                    Snackbar.make(mActivity.findViewById(R.id.frameLayoutMain), "Error processing photo. Pls retake.", Snackbar.LENGTH_LONG).show();
                 }
             }
-
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.d("Error","BOOOOOOOO");
-                Log.e("UPLOAD_ERROR",t.getLocalizedMessage());
+                Snackbar.make(mActivity.findViewById(R.id.frameLayoutMain), "Error connecting to server.", Snackbar.LENGTH_LONG).show();
+                layoutSpinner.setVisibility(View.GONE);
+                layoutMain.setVisibility(View.VISIBLE);
             }
         });
     }
 
     private void initRetrofit(){
         mHttpClient=new OkHttpClient().newBuilder().readTimeout(20, TimeUnit.SECONDS).build();
-        mUploadHandler=new Retrofit.Builder().baseUrl("http://192.168.1.100:8080").client(mHttpClient).build();
+        mUploadHandler=new Retrofit.Builder().baseUrl("http://"+mActivity.getIP()+":8080").client(mHttpClient).build();
         mUploadService=mUploadHandler.create(IUploadService.class);
     }
 

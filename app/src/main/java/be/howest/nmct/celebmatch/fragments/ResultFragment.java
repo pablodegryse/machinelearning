@@ -45,6 +45,7 @@ public class ResultFragment extends Fragment {
             String score=subObj.getString("score");
             Double dScore=Double.parseDouble(score);
             dScore=dScore*100;
+            dScore=(double)Math.round(dScore*100)/100;
             String result=name+" "+String.valueOf(dScore)+"% match";
             resultArray.add(result);
         }
@@ -137,7 +138,6 @@ public class ResultFragment extends Fragment {
             case "christian bale":
                 imgViewActor.setImageResource(R.drawable.christian_bale);
                 break;
-
         }
     }
 
