@@ -317,11 +317,13 @@ public class PhotoFragment extends Fragment {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d("success","YAAAAAAAY");
                 try {
-                    new JSONObject(response.body().string());
-                    mListener.ShowResult(response.body().string());
+                    JSONObject test= new JSONObject(response.body().string());
+                    mListener.ShowResult(test.toString());
                 } catch (IOException e) {
                 } catch (JSONException e) {
                     Snackbar.make(mActivity.findViewById(R.id.frameLayoutMain), "Error processing photo. Pls retake.", Snackbar.LENGTH_LONG).show();
+                    layoutSpinner.setVisibility(View.GONE);
+                    layoutMain.setVisibility(View.VISIBLE);
                 }
             }
             @Override
