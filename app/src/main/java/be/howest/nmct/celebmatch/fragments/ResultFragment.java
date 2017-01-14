@@ -138,6 +138,24 @@ public class ResultFragment extends Fragment {
             case "christian bale":
                 imgViewActor.setImageResource(R.drawable.christian_bale);
                 break;
+            case "keanu reeves":
+                imgViewActor.setImageResource(R.drawable.keanu_reeves);
+                break;
+            case "aaron paul":
+                imgViewActor.setImageResource(R.drawable.aaron_paul);
+                break;
+            case "bryan cranston":
+                imgViewActor.setImageResource(R.drawable.bryan_cranston);
+                break;
+            case "matt damon":
+                imgViewActor.setImageResource(R.drawable.matt_damon);
+                break;
+            case "jared leto":
+                imgViewActor.setImageResource(R.drawable.jared_leto);
+                break;
+            case "mark wahlberg":
+                imgViewActor.setImageResource(R.drawable.mark_wahlberg);
+                break;
         }
     }
 
