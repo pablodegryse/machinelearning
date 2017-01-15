@@ -338,7 +338,7 @@ public class PhotoFragment extends Fragment {
 
     private void initRetrofit(){
         mHttpClient=new OkHttpClient().newBuilder().readTimeout(20, TimeUnit.SECONDS).build();
-        mUploadHandler=new Retrofit.Builder().baseUrl("http://"+mActivity.getIP()+":8080").client(mHttpClient).build();
+        mUploadHandler=new Retrofit.Builder().baseUrl("http://"+mActivity.getIP()).client(mHttpClient).build();
         mUploadService=mUploadHandler.create(IUploadService.class);
     }
 
